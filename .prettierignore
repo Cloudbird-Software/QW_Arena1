@@ -3,3 +3,6 @@ coverage/
 dist/
 reports/
 CHANGELOG.md
+# 参考文档（机读简报/专家计划原文，非代码资产，不参与格式化）
+Arena_Detail.md
+Plan.md
