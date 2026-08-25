@@ -13,10 +13,10 @@ export interface SpecThreshold {
 }
 
 /** 主图最短边下限（像素）。 */
-export const MAIN_MIN_SIDE = 1200;
+const MAIN_MIN_SIDE = 1200;
 
 /** 详情图最短边下限（像素）。 */
-export const DETAIL_MIN_SIDE = 900;
+const DETAIL_MIN_SIDE = 900;
 
 /** 单张图片体积上限（字节，4.5MB——INV-4 提交包 100MB 的下游保障）。 */
 export const MAX_IMAGE_BYTES = 4_500_000;

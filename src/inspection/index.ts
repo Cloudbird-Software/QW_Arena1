@@ -6,8 +6,6 @@ import type { InspectableRole, SpecThreshold } from "./thresholds.js";
 
 export type { InspectableRole, SpecThreshold } from "./thresholds.js";
 
-export { SPEC_THRESHOLDS } from "./thresholds.js";
-
 /** 待检图片产物（落盘元数据）。 */
 export interface ImageArtifact {
   role: InspectableRole;

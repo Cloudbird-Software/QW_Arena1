@@ -98,14 +98,15 @@ describe("W7 产物规格校验与强制规格化（AC-7）", () => {
   });
 
   it("越界产物被强制规格化：动作与违规一一对应（BEH-7 then）", () => {
-    const plan = inspection.normalizeImage?.(
-      mainImage({
-        width: 1199,
-        height: 1250,
-        background: "gray",
-        bytes: 5_000_000,
-      }),
-    );
+    const artifact = mainImage({
+      width: 1199,
+      height: 1250,
+      background: "gray",
+      bytes: 5_000_000,
+    });
+    const findings = inspection.inspectImage?.(artifact) ?? [];
+    expect(findings.length).toBe(4);
+    const plan = inspection.normalizeImage?.(artifact);
     expect(plan?.artifactRole).toBe("main_image");
     expect(plan?.actions).toContain("resize-crop-to-min-side");
     expect(plan?.actions).toContain("center-crop-square");
@@ -122,5 +123,9 @@ describe("W7 产物规格校验与强制规格化（AC-7）", () => {
     expect(byKey["detail_min_side"]?.value).toBe(900);
     expect(byKey["max_image_bytes"]?.value).toBe(4_500_000);
     expect(thresholds.length).toBeGreaterThanOrEqual(3);
+    for (const threshold of inspection.listSpecThresholds?.() ?? []) {
+      expect(threshold.value).toBeGreaterThan(0);
+      expect(threshold.unit.length).toBeGreaterThan(0);
+    }
   });
 });
