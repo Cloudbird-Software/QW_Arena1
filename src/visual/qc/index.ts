@@ -83,7 +83,7 @@ function parseReview(raw: string): RawReview {
 function pickDimensions(parsed: RawReview): Record<QCDimension, string> {
   return Object.fromEntries(
     QC_DIMENSIONS.map((dimension) => [dimension, verdictOf(parsed, dimension)]),
-  );
+  ) as Record<QCDimension, string>;
 }
 
 function verdictOf(parsed: RawReview, dimension: QCDimension): string {
