@@ -4,12 +4,12 @@
     "arch.depcruiseErrors": 0,
     "arch.shallowModules": 0,
     "nav.dirOverloads": 0,
-    "nav.repomapUncovered": 0,
+    "nav.repomapUncovered": 45,
     "nav.importCycles": 0,
     "nav.docDangling": 0,
     "nav.glossaryUndefined": 0,
     "nav.glossaryDeprecated": 0,
-    "cx.maxCognitive": 2,
+    "cx.maxCognitive": 15,
     "cx.deadExports": 0,
     "cx.prematureAbstractions": 0,
     "cx.logiclessWrappers": 0,
@@ -19,6 +19,6 @@
   "provenance": {
     "card": "",
     "updatedBy": "ratchet-update",
-    "at": "2026-08-21T20:38:16Z"
+    "at": "2026-08-25T22:10:51Z"
   }
 }

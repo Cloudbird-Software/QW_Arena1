@@ -6,3 +6,8 @@ CHANGELOG.md
 # 参考文档（机读简报/专家计划原文，非代码资产，不参与格式化）
 Arena_Detail.md
 Plan.md
+# 测试夹具（商品样例数据 JSON 达 ~1.8MB，非代码资产）
+tools/fixtures/
+# 本地临时产物
+.tmp/
+tmp-pack/
