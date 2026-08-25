@@ -25,8 +25,9 @@ export interface RenderedChart {
 /**
  * 模型调用审计回调（管线注入）。本地渲染路径（BEH-5）确认零调用——
  * deps 仅为声明依赖面而存在，`void deps` 显式表达"本路径不使用"。
+ * 结构化类型：调用方以字面量传入，无需导入本接口名。
  */
-export interface RenderDeps {
+interface RenderDeps {
   noteModelCall?: (label: string) => void;
 }
 
