@@ -3,11 +3,7 @@
 // 禁止散落于自由文本；条目变更须与 specs/IR-0001 对应条款对齐。
 
 /** 负面提示词失败模式（AC-4 固定四类）。 */
-type NegativeFailureMode =
-  | "text_in_image"
-  | "watermark"
-  | "collage"
-  | "border";
+type NegativeFailureMode = "text_in_image" | "watermark" | "collage" | "border";
 
 export const NEGATIVE_FAILURE_MODES: readonly NegativeFailureMode[] = [
   "text_in_image",
