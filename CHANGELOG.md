@@ -10,3 +10,4 @@
 - `src/visual` 模块：三市场视觉词典资产与图像提示词组装（`listMarketDictionaryEntries` / `buildImagePrompt`）。
 - `src/visual/qc` 子模块：VLM 质检闭环——四维评审结构化记录与重生成决策（`reviewImage` / `planRegeneration` / `buildReviewPrompt`）。
 - `src/visual/stability` 子模块：输出稳定性控制——固定种子与四类失败模式负面提示词（`buildGenerationRequest` / `listNegativePromptEntries`）。
+- `src/render` 模块：尺码表详情图本地渲染——白底 SVG、三语字体嵌入、零模型调用（`renderSizeChart` / `listFontAssets`）。
