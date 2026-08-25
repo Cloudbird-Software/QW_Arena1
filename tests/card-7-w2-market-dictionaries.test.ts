@@ -11,7 +11,6 @@ interface MarketDictionaryEntry {
 
 interface VisualModule {
   MARKETS?: readonly string[];
-  marketDictionaryFor?: (market: string) => Record<string, string>;
   listMarketDictionaryEntries?: () => MarketDictionaryEntry[];
   buildImagePrompt?: (category: string, role: string, market: string) => string;
 }
@@ -24,7 +23,11 @@ const visual = await loadVisual();
 const MARKET_DIMENSIONS = ["lighting", "tone", "style"];
 
 const dictionaryOf = (market: string): Record<string, string> =>
-  visual.marketDictionaryFor?.(market) ?? {};
+  Object.fromEntries(
+    (visual.listMarketDictionaryEntries?.() ?? [])
+      .filter((entry) => entry.market === market)
+      .map((entry) => [entry.dimension, entry.text]),
+  );
 
 const promptOf = (category: string, role: string, market: string): string =>
   visual.buildImagePrompt?.(category, role, market) ?? "";
@@ -83,11 +86,11 @@ describe("W2 三市场视觉词典资产（AC-2）", () => {
   it("场景类详情图提示词同时绑定品类构图与市场词典（INV-2）", () => {
     const markets = visual.MARKETS ?? [];
     expect(markets.length).toBeGreaterThan(0);
-    const prompt = promptOf("tops", "scene_image", markets[0] ?? "EN");
+    const first = markets[0] ?? "EN";
+    const prompt =
+      visual.buildImagePrompt?.("tops", "scene_image", first) ?? "";
     for (const dimension of MARKET_DIMENSIONS) {
-      expect(prompt).toContain(
-        dictionaryOf(markets[0] ?? "EN")[dimension] ?? "__none__",
-      );
+      expect(prompt).toContain(dictionaryOf(first)[dimension] ?? "__none__");
     }
   });
 });
