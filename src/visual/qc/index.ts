@@ -6,8 +6,6 @@ import type { QCDimension } from "./dimensions.js";
 
 export type { QCDimension } from "./dimensions.js";
 
-export { QC_DIMENSIONS, REGENERATION_LIMIT } from "./dimensions.js";
-
 /** 四维评审的结构化记录（IFACE-2：机器可解析 + 留痕运行日志）。 */
 export interface QCReviewRecord {
   imageUrl: string;
@@ -17,7 +15,7 @@ export interface QCReviewRecord {
   reviewedAt: string;
 }
 
-export type RegenerationAction = "accept" | "regenerate" | "fallback";
+type RegenerationAction = "accept" | "regenerate" | "fallback";
 
 /** 重生成决策：不合格携带反馈重生成（BEH-3），超限走兜底（BUDGET-2）。 */
 export interface RegenerationPlan {
