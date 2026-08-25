@@ -85,6 +85,17 @@ describe("W8 策略说明文档三节（AC-8）", () => {
     expect(second.map((s) => s.id)).toEqual(ids);
   });
 
+  it("节标题与文档渲染一致：清单定义即文档结构", () => {
+    const headings = (strategy.listStrategySections?.() ?? []).map(
+      (s) => s.heading,
+    );
+    const markdown =
+      strategy.buildStrategyDocument?.(SAMPLE_INPUT)?.markdown ?? "";
+    for (const heading of headings) {
+      expect(markdown).toContain(`## ${heading}`);
+    }
+  });
+
   it("文档为 markdown 结构：主标题 + 节标题", () => {
     const markdown = strategy.buildStrategyDocument?.(SAMPLE_INPUT)?.markdown;
     expect(markdown?.startsWith("# ")).toBe(true);
