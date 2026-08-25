@@ -12,3 +12,4 @@
 - `src/visual/stability` 子模块：输出稳定性控制——固定种子与四类失败模式负面提示词（`buildGenerationRequest` / `listNegativePromptEntries`）。
 - `src/render` 模块：尺码表详情图本地渲染——白底 SVG、三语字体嵌入、零模型调用（`renderSizeChart` / `listFontAssets`）。
 - `src/fallback` 模块：单级兜底——图片源图裁剪加本地合成、视频图片轮播，无多级模型轮换（`planFallback` / `listFallbackStrategies`）。
+- `src/inspection` 模块：产物规格校验与强制规格化——主图白底方图 ≥1200、详情图 ≥900、单张 ≤4.5MB（`inspectImage` / `normalizeImage` / `listSpecThresholds`）。
