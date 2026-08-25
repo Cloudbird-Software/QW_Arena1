@@ -68,5 +68,10 @@ describe("W6 兜底路径收缩——单级兜底（AC-6）", () => {
     expect(image?.steps.join(" ")).toContain("local");
     const video = fallback.planFallback?.("video", "generation-failed");
     expect(video?.steps.join(" ")).toContain("slideshow");
+    const strategies = fallback.listFallbackStrategies?.() ?? [];
+    expect(strategies.length).toBe(2);
+    for (const strategy of strategies) {
+      expect(strategy.steps.join(" ")).not.toContain("model");
+    }
   });
 });
