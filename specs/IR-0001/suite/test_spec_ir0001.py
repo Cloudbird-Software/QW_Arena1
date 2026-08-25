@@ -139,6 +139,119 @@ class L2SemanticAnchors(unittest.TestCase):
                 self.assertTrue(any(w in text for w in normative),
                                 f"{uid} 缺规范性动词（必须/不得/禁止/须/应）——摆拍式条款")
 
+    # ---- S2（义务降级）补强：红队第二轮攻击得手后的套件 v3 ----
+    # 攻击样本：把"必须"弱化为"应/原则上须/推荐"，把硬阈值降为"参考基线"，
+    # 把执行义务改为"文档声称/以记载为准"——全部锚点原样保留却背叛意图。
+    STRONG_MODALITY = ("必须", "不得", "禁止")
+    WEAKENING_PHRASES = [
+        "原则上", "建议", "推荐", "努力", "默认", "声称", "宣称", "据称",
+        "记载", "为目标", "设计目标", "参考基线", "参考值", "建议值",
+        "可跳过", "可上调", "可省略", "不阻断", "深度不限", "裁量",
+        "视效果", "时间紧张", "高峰期", "文档口径", "意向约束", "意向声明",
+        "不视为违规", "允许偏离", "异常时回退", "受阻时", "视运行情况",
+    ]
+
+    def test_strong_modality(self):
+        """INV/BEH/IFACE 义务动词必须是强规范动词（必须/不得/禁止）——"应/须"可被原则上/建议稀释。"""
+        s = read(SPEC)
+        clauses = re.findall(r"^- ((?:INV|BEH|IFACE)-\d+): (.+)$", s, re.M)
+        self.assertGreaterEqual(len(clauses), 14, "INV/BEH/IFACE 条款不足 14 条")
+        for uid, text in clauses:
+            self.assertTrue(any(w in text for w in self.STRONG_MODALITY),
+                            f"{uid} 缺强规范动词（必须/不得/禁止）——义务降级改写嫌疑")
+
+    def test_no_weakening_phrases(self):
+        """条款行与 AC 段禁弱化逃逸短语——把强制条款掏空为意向声明的直接红旗。"""
+        s = read(SPEC)
+        lines = [l for l in s.splitlines()
+                 if re.match(r"^\s*(- )?(id: AC-|given:|when:|then:|(?:INV|BEH|IFACE|BUDGET)-\d+:)", l.strip())]
+        for l in lines:
+            hit = [w for w in self.WEAKENING_PHRASES if w in l]
+            self.assertEqual(hit, [], f"弱化逃逸短语 {hit}: {l[:60]}——义务降级改写")
+
+    # ---- S3（义务转嫁）补强：红队第三轮攻击得手后的套件 v4 ----
+    # 攻击样本：强动词与锚点全部保留，但义务受托对象被换成"模板/占位符/
+    # 检查单/操作手册/人工填写"——系统只需产出文档表格而不执行视觉质量管线。
+    # 治理意图：BEH/IFACE 的义务主体是系统运行时行为，AC 验收的是产物与
+    # 运行时效果，不是关于它们的文书。
+    TRANSFER_PHRASES = [
+        "操作员", "手动", "供人工", "人工填写", "人工复核", "人工挑选",
+        "人工逐项", "人工携带", "手工计数", "选用表", "检查单", "检查清单",
+        "工艺单", "操作手册", "台账", "占位", "字段名", "打勾", "打分栏",
+        "提示词模板", "参数表", "对照表", "目录含", "标注", "写明", "载明",
+        "逐项", "仅对样例", "演示场景", "首件商品", "抽样", "仅标记", "被标记",
+        "等效替换", "等效改写", "视同",
+    ]
+
+    def test_no_obligation_transfer(self):
+        """BEH/IFACE/INV 条款与 AC then 禁义务转嫁标记——系统义务不得转嫁给文书或人工。"""
+        s = read(SPEC)
+        lines = [l for l in s.splitlines()
+                 if re.match(r"^\s*(- )?(id: AC-|then:|(?:INV|BEH|IFACE)-\d+:)", l.strip())]
+        for l in lines:
+            hit = [w for w in self.TRANSFER_PHRASES if w in l]
+            self.assertEqual(hit, [], f"义务转嫁标记 {hit}: {l[:60]}——执行义务被转嫁给文书/人工")
+
+    # ---- S4（义务时态后移）补强：红队第四轮攻击得手后的套件 v5 ----
+    # 攻击样本：义务动词换成"确认/核验已发生"——系统从执行者降级为事后
+    # 裁定者，锚点与强动词全部原样保留。BEH 的"校验"是执行规格校验并
+    # 强制处置（原 BEH-7），"确认/核验已发生"是转述他人行为。
+    TENSE_ESCAPE_AC = [
+        "历史记录", "回放", "事后", "溯源核验", "审计显示", "报告确认",
+        "抽验", "归档", "已携带", "已注入", "已覆盖", "已获得",
+    ]
+    TENSE_ESCAPE_BEH = ["确认", "核验为", "核验该"]
+
+    def test_no_tense_escape(self):
+        """AC then 禁事后证据词、BEH 条款禁"确认/核验已发生"——验收的是产物与运行时效果，不是转述。"""
+        s = read(SPEC)
+        thens = re.findall(r"then: (.+)", s)
+        for t in thens:
+            hit = [w for w in self.TENSE_ESCAPE_AC if w in t]
+            self.assertEqual(hit, [], f"AC then 事后转述词 {hit}: {t[:50]}——验收时态后移")
+        for l in s.splitlines():
+            if re.match(r"^- BEH-\d+:", l.strip()):
+                hit = [w for w in self.TENSE_ESCAPE_BEH if w in l]
+                self.assertEqual(hit, [], f"BEH 时态后移词 {hit}: {l[:60]}——执行义务被改为事后核验")
+
+    # ---- S5（逃生舱条款）补强：红队第五轮攻击得手后的套件 v6 ----
+    # 攻击样本：锚点、动词、句型全部原样，仅在条款/then 句尾追加
+    # "时间预算受压时按剩余额度折算执行"式逃生从句——义务变成尽力而为。
+    ESCAPE_HATCH = [
+        "受压时", "额度折算", "折算执行", "深度为限", "预算允许", "按剩余",
+        "资源受限", "资源允许", "周期允许", "条件允许", "能力允许", "余量",
+        "最低限度", "尽力完成", "或以", "或按", "或在", "或由", "或改用", "或改为",
+    ]
+
+    def test_no_escape_hatch(self):
+        """BEH/INV/IFACE 条款与 AC then 禁逃生从句——强义务不得被句尾从句掏空为尽力而为。"""
+        s = read(SPEC)
+        lines = [l for l in s.splitlines()
+                 if re.match(r"^\s*(- )?(id: AC-|then:|(?:INV|BEH|IFACE|BUDGET)-\d+:)", l.strip())]
+        for l in lines:
+            hit = [w for w in self.ESCAPE_HATCH if w in l]
+            self.assertEqual(hit, [], f"逃生舱从句 {hit}: {l[:60]}——强义务被掏空")
+
+    # ---- S6（前置条件堆叠）补强：红队第六轮攻击得手后的套件 v7 ----
+    # 攻击样本：锚点、动词、then 全部原样，仅在 BEH 触发条件与 given/when
+    # 追加"且配套资产预检通过/仅在抽选代表样本上"——义务触发面被收窄到
+    # 近乎不可达，条款字面上完好无损。
+    BEH_COND_STACK = ["且", "预检", "就绪", "齐备", "配额"]
+    GWT_NARROW = ["，且", "预检", "抽选", "代表样本"]
+
+    def test_no_precondition_stacking(self):
+        """BEH"当…时"从句禁堆叠前置、given/when 禁收窄从句——触发条件层不得偷改验收范围。"""
+        s = read(SPEC)
+        for l in s.splitlines():
+            st = l.strip()
+            m = re.match(r"^- (BEH-\d+): 当(.+?)时[，,]", st)
+            if m:
+                hit = [w for w in self.BEH_COND_STACK if w in m.group(1)]
+                self.assertEqual(hit, [], f"BEH 触发条件堆叠 {hit}: {l[:60]}——义务触发面被收窄")
+            if re.match(r"^(- )?(given|when):", st):
+                hit = [w for w in self.GWT_NARROW if w in l]
+                self.assertEqual(hit, [], f"given/when 收窄从句 {hit}: {l[:60]}——验收范围被偷改")
+
 
 class L3NegativeAnchors(unittest.TestCase):
     """深水位标志：具体数值、三语枚举、维度计数——偷懒改写最先丢的东西。"""
