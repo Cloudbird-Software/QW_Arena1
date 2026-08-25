@@ -57,7 +57,7 @@ export function listFontAssets(): FontAsset[] {
 
 function fontFor(market: ChartMarket): FontAsset {
   const found = FONT_ASSETS.find((asset) => asset.market === market);
-  return found ?? FONT_ASSETS[0];
+  return found ?? (FONT_ASSETS[0] as FontAsset);
 }
 
 function svgFor(
