@@ -37,22 +37,8 @@ const QC_DIMENSIONS = [
   "compliance",
 ];
 
-const URL = "https://model.example/generated/img-001.png";
-
-const reviewOf = (imageUrl: string, rawReview: string): QCReviewRecord =>
-  qc.reviewImage?.(imageUrl, rawReview) ?? {
-    imageUrl: "",
-    dimensions: {},
-    issues: [],
-    passed: false,
-    reviewedAt: "",
-  };
-
-const planOf = (
-  record: QCReviewRecord,
-  attemptsUsed: number,
-): RegenerationPlan =>
-  qc.planRegeneration?.(record, attemptsUsed) ?? { action: "" };
+const URL_A = "https://model.example/generated/img-001.png";
+const URL_B = "https://model.example/generated/img-002.png";
 
 const passingReview: string = JSON.stringify({
   factual_consistency: "pass",
@@ -72,48 +58,61 @@ const failingReview: string = JSON.stringify({
 
 describe("W3 VLM 质检闭环（AC-3）", () => {
   it("评审输入引用模型返回的图片 URL（IFACE-2 链路约束）", () => {
-    const prompt = qc.buildReviewPrompt?.(URL) ?? "";
-    expect(prompt.length).toBeGreaterThan(0);
-    expect(prompt).toContain(URL);
+    const promptA = qc.buildReviewPrompt?.(URL_A) ?? "";
+    const promptB = qc.buildReviewPrompt?.(URL_B) ?? "";
+    expect(promptA.length).toBeGreaterThan(0);
+    expect(promptA).toContain(URL_A);
+    expect(promptB).toContain(URL_B);
   });
 
   it("四维评审记录为机器可解析结构化记录（IFACE-2）", () => {
-    const record = reviewOf(URL, failingReview);
-    expect(record.imageUrl).toBe(URL);
-    expect(Object.keys(record.dimensions).length).toBe(QC_DIMENSIONS.length);
+    const record = qc.reviewImage?.(URL_A, failingReview);
+    expect(record?.imageUrl).toBe(URL_A);
+    expect(Object.keys(record?.dimensions ?? {}).length).toBe(
+      QC_DIMENSIONS.length,
+    );
     for (const dimension of QC_DIMENSIONS) {
-      expect(record.dimensions[dimension]).toBe(
+      expect(record?.dimensions[dimension]).toBe(
         JSON.parse(failingReview)[dimension],
       );
     }
-    expect(record.issues).toContain("garment color differs from source image");
-    expect(record.reviewedAt.length).toBeGreaterThan(0);
+    expect(record?.issues).toContain("garment color differs from source image");
+    expect(record?.reviewedAt?.length ?? 0).toBeGreaterThan(0);
   });
 
   it("不合格记录判定 passed 为 false，合格记录为 true", () => {
-    expect(reviewOf(URL, failingReview).passed).toBe(false);
-    expect(reviewOf(URL, passingReview).passed).toBe(true);
+    expect(qc.reviewImage?.(URL_A, failingReview)?.passed).toBe(false);
+    expect(qc.reviewImage?.(URL_A, passingReview)?.passed).toBe(true);
   });
 
   it("解析失败时保守判定不合格（fail-closed，INV-1 不得绕过）", () => {
-    const record = reviewOf(URL, "not-json-at-all");
-    expect(record.passed).toBe(false);
-    expect(record.issues.length).toBeGreaterThan(0);
-    expect(record.imageUrl).toBe(URL);
+    const record = qc.reviewImage?.(URL_A, "not-json-at-all");
+    expect(record?.passed).toBe(false);
+    expect(record?.issues.length ?? 0).toBeGreaterThan(0);
+    expect(record?.imageUrl).toBe(URL_A);
   });
 
   it("重生成计数与 BUDGET-2 上限：0/1 次重生成，第 2 次后走兜底", () => {
-    const record = reviewOf(URL, failingReview);
-    expect(planOf(record, 0).action).toBe("regenerate");
-    expect(planOf(record, 1).action).toBe("regenerate");
-    expect(planOf(record, 2).action).toBe("fallback");
-    expect(planOf(reviewOf(URL, passingReview), 0).action).toBe("accept");
+    const record = qc.reviewImage?.(URL_A, failingReview);
+    expect(qc.planRegeneration?.(record as QCReviewRecord, 0)?.action).toBe(
+      "regenerate",
+    );
+    expect(qc.planRegeneration?.(record as QCReviewRecord, 1)?.action).toBe(
+      "regenerate",
+    );
+    expect(qc.planRegeneration?.(record as QCReviewRecord, 2)?.action).toBe(
+      "fallback",
+    );
+    const accepted = qc.reviewImage?.(URL_A, passingReview);
+    expect(qc.planRegeneration?.(accepted as QCReviewRecord, 0)?.action).toBe(
+      "accept",
+    );
   });
 
   it("不合格重生成计划携带评审反馈（BEH-3 反馈透传）", () => {
-    const record = reviewOf(URL, failingReview);
-    const plan = planOf(record, 0);
-    expect(plan.action).toBe("regenerate");
-    expect(plan.feedback ?? "").toContain("garment color differs");
+    const record = qc.reviewImage?.(URL_A, failingReview);
+    const plan = qc.planRegeneration?.(record as QCReviewRecord, 0);
+    expect(plan?.action).toBe("regenerate");
+    expect(plan?.feedback ?? "").toContain("garment color differs");
   });
 });

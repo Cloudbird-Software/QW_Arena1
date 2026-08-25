@@ -8,3 +8,4 @@
 - 初始模板工程（CI gate / hygiene / dependabot / automerge 全套护栏）。
 - `src/visual` 模块：品类构图模板资产与查询面（`compositionFor` / `listCompositionAssets`）。
 - `src/visual` 模块：三市场视觉词典资产与图像提示词组装（`listMarketDictionaryEntries` / `buildImagePrompt`）。
+- `src/visual/qc` 子模块：VLM 质检闭环——四维评审结构化记录与重生成决策（`reviewImage` / `planRegeneration` / `buildReviewPrompt`）。
