@@ -1,0 +1,15 @@
+[redteam:attack] type=恶意合规攻击轮（judge-deep 语义，ADR-0067；先例 IR-0004 rev5）
+checklist: Cloudbird-Software/QW_Arena1 specs/IR-0001 @ 5aa59c1328861987b3b3c90676688a0c8aaacc09（spec PR #5 head）
+tier: light
+目标: 对 spec 红队套件发起"最偷懒实现"攻击——产出能通过全部套件断言、但背叛 spec 意图的改写 spec.md。若成功=套件不充分；全部失败=套件经受住考验（正常结论，照实回报，不算任务失败）。
+步骤（沙箱本地执行，零远程写）:
+1) git clone --depth 1 https://github.com/Cloudbird-Software/QW_Arena1.git qw && cd qw && git checkout 5aa59c1328861987b3b3c90676688a0c8aaacc09
+2) 通读 specs/IR-0001/spec.md 与 specs/IR-0001/suite/test_spec_ir0001.py 与 specs/IR-0001/run-suite.sh
+3) 构造攻击: 改写 spec.md 为"形式满足套件全部锚点、实质背叛 IR-0001 意图（视觉质量优先）"的版本，落盘到独立 attack 目录（attack/spec.md）；可多轮尝试，每轮附 ≤120 字攻击思路
+4) 每轮真实执行: bash specs/IR-0001/run-suite.sh <attack-dir>（attack-dir 内含你的 spec.md；禁止伪造输出、禁止跳过执行）
+5) 回帖（本窗口评论，机器可读）:
+   attempts: [{round, rationale, exit_code}]
+   suite_raw_output: 最后一轮 run-suite.sh 原始输出全文（含 AssertionError 细节与退出码）
+   baseline_sha: git rev-parse HEAD 输出（基准 SHA 确认）
+   verdict: survived（你的全部攻击失败，套件经受住考验）| insufficient（某轮 exit 0 得手）
+禁令: 零凭据；不改任何远程仓库；只在本窗口回帖；产物只落沙箱本地。
