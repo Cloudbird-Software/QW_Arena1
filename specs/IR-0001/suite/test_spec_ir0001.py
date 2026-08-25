@@ -60,8 +60,11 @@ class L1Structure(unittest.TestCase):
         for i in range(1, 10):
             m = re.search(rf"- id: AC-{i}\n\s+given: (.+)\n\s+when: (.+)\n\s+then: (.+)", s)
             self.assertIsNotNone(m, f"AC-{i} 缺 given/when/then 三段")
-            for part in m.groups():
-                self.assertGreaterEqual(len(part.strip()), 8, f"AC-{i} 某段过短（摆拍式 AC）")
+            g, w, t = (p.strip() for p in m.groups())
+            # 深度下限（S1' 补强，IR-0004 rev5 口径）：防三段皆样板短句
+            self.assertGreaterEqual(len(g), 12, f"AC-{i} given 过短（<12 字）")
+            self.assertGreaterEqual(len(w), 8, f"AC-{i} when 过短（<8 字）")
+            self.assertGreaterEqual(len(t), 16, f"AC-{i} then 过短（<16 字）")
 
     def test_clause_sections(self):
         s = read(SPEC)
@@ -96,6 +99,45 @@ class L2SemanticAnchors(unittest.TestCase):
         # 锚密度：正文（去 frontmatter）需有一定体量，防"关键词堆砌+空壳条款"
         body = s.split("---", 2)[-1]
         self.assertGreaterEqual(len(body), 1500, "正文过薄——疑似空壳 spec")
+
+    # ---- S1'（摆拍式 AC）补强：语义锚绑定到条款位置——关键词搬到位≠语义保留 ----
+    CLAUSE_ANCHORS = [
+        ("INV-1", ["三核心件", "不得被降级路径替换或绕过"]),
+        ("INV-2", ["参考锚定", "场景类详情图允许纯文生图", "品类构图与市场词典"]),
+        ("INV-3", ["可枚举的配置资产或代码规则", "禁止散落"]),
+        ("INV-4", ["不得突破", "模型到 URL 再到模型", "环境变量读取", "严格校验"]),
+        ("BEH-1", ["每个图像角色", "构图模板"]),
+        ("BEH-2", ["光照、色调与风格词典条目"]),
+        ("BEH-3", ["携带评审反馈", "BUDGET-2"]),
+        ("BEH-4", ["固定种子", "四类失败模式"]),
+        ("BEH-5", ["本地渲染", "不发起任何模型调用"]),
+        ("BEH-6", ["源图裁剪", "图片轮播", "不得尝试多级模型轮换"]),
+        ("BEH-7", ["白底方图", "1200", "900", "4.5"]),
+        ("BEH-8", ["成本估算", "效率对比", "适配成本声明"]),
+        ("IFACE-1", ["独立配置资产", "可枚举审查"]),
+        ("IFACE-2", ["机器可解析", "四维判定加问题清单"]),
+        ("BUDGET-2", ["上限为 2 次", "走兜底路径"]),
+    ]
+
+    def test_clause_anchor_binding(self):
+        s = read(SPEC)
+        clauses = dict(re.findall(r"^- ((?:INV|BEH|IFACE|BUDGET)-\d+): (.+)$", s, re.M))
+        for uid, anchors in self.CLAUSE_ANCHORS:
+            self.assertIn(uid, clauses, f"缺条款 {uid}")
+            missing = [a for a in anchors if a not in clauses[uid]]
+            self.assertEqual(missing, [], f"{uid} 条款语义锚缺失 {missing}——摆拍式改写嫌疑")
+
+    def test_clause_normative_depth(self):
+        """每条 INV/BEH/IFACE 条款须含规范性动词且 ≥20 字——空壳条款直接红。"""
+        s = read(SPEC)
+        clauses = re.findall(r"^- ((?:INV|BEH|IFACE|BUDGET|DECISION|ASSUMPTION)-\d+): (.+)$", s, re.M)
+        self.assertGreaterEqual(len(clauses), 17, "条款总数少于 17")
+        normative = ("必须", "不得", "禁止", "须", "应")
+        for uid, text in clauses:
+            self.assertGreaterEqual(len(text), 20, f"{uid} 条款正文短于 20 字——空壳条款")
+            if uid.startswith(("INV", "BEH", "IFACE")):
+                self.assertTrue(any(w in text for w in normative),
+                                f"{uid} 缺规范性动词（必须/不得/禁止/须/应）——摆拍式条款")
 
 
 class L3NegativeAnchors(unittest.TestCase):
@@ -139,6 +181,37 @@ class L3NegativeAnchors(unittest.TestCase):
 
 
 class L4Consistency(unittest.TestCase):
+    # S1' 补强：每条 AC 的 then 须含专属规范锚——摆拍式 then（"符合要求/正常输出"）直接红
+    AC_THEN_ANCHORS = {
+        1: ["品类专属构图指令", "构图指令不同"],
+        2: ["光照、色调", "两两互异"],
+        3: ["四维", "BUDGET-2", "评审反馈"],
+        4: ["固定种子", "四类失败模式"],
+        5: ["本地渲染", "零模型调用"],
+        6: ["源图裁剪", "图片轮播", "不存在多级模型轮换"],
+        7: ["白底方图", "1200", "900", "4.5"],
+        8: ["成本估算", "效率对比", "适配成本声明"],
+        9: ["survived", "AC-1 至 AC-8"],
+    }
+
+    def test_ac_then_anchor_binding(self):
+        s = read(SPEC)
+        for i, anchors in self.AC_THEN_ANCHORS.items():
+            m = re.search(rf"- id: AC-{i}\n\s+given: .+\n\s+when: .+\n\s+then: (.+)", s)
+            self.assertIsNotNone(m, f"AC-{i} then 段缺失")
+            missing = [a for a in anchors if a not in m.group(1)]
+            self.assertEqual(missing, [], f"AC-{i} then 缺专属规范锚 {missing}——摆拍式 AC")
+
+    def test_ac_then_no_vacuous(self):
+        """then 段禁空洞收尾短语（S1' 负控制）。"""
+        s = read(SPEC)
+        vacuous = ("符合要求", "正常输出", "满足需求", "达到预期", "完成生成", "即可", "等要求")
+        thens = re.findall(r"then: (.+)", s)
+        self.assertEqual(len(thens), 9)
+        for t in thens:
+            hit = [w for w in vacuous if w in t]
+            self.assertEqual(hit, [], f"then 含空洞短语 {hit}: {t[:50]}")
+
     def test_identity(self):
         fm = frontmatter(read(SPEC))
         self.assertIn("irRef: IR-0001", fm, "irRef 必须是 IR-0001")
