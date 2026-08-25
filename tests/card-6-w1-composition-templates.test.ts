@@ -71,15 +71,14 @@ describe("W1 品类构图模板资产（AC-1）", () => {
   });
 
   it("组装图像提示词时含该品类专属构图指令（when/then）", () => {
-    const cats = visual.GARMENT_CATEGORIES ?? [];
-    expect(cats.length).toBeGreaterThan(0);
-    for (const category of cats) {
-      const directive = directiveOf(category, "main_image");
+    const assets = visual.listCompositionAssets?.() ?? [];
+    expect(assets.length).toBeGreaterThan(0);
+    for (const asset of assets) {
       const prompt = [
         "e-commerce product photo of the listed garment",
-        directive,
+        asset.directive,
       ].join(", ");
-      expect(prompt).toContain(directive);
+      expect(prompt).toContain(asset.directive);
     }
   });
 });
