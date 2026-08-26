@@ -4,8 +4,10 @@
 #     再使用——未定义即 fail（ruleId=nav-glossary-undefined）；
 #   - deprecated：弃用词 → 规范词映射，出现即 fail（同义词漂移是 agent 检索死敌）；
 #   - version 随删改递增（收紧走普通 PR，删条目/降约束须 ADR）。
-version: 2
+version: 3
 acronyms:
+  AI: 人工智能（Artificial Intelligence；「千问 AI Arena」赛事名组成部分）
+  C1: 治理变更路径一级（GOVERNANCE flows.governance_change——治理意图变更，须 ADR + owner review）
   AC: 验收准则（Acceptance Criteria，卡面 Given-When-Then 条款）
   ACCEPT: 验收与 bug 修复角色指引文件（ROLE-ACCEPT.md，ADR-0095 按意图路由）
   ADR: 架构决策记录（Architecture Decision Record，archive 仓 adr/ 正本）
