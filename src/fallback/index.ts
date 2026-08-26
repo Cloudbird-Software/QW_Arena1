@@ -19,6 +19,9 @@ export interface FallbackPlan extends FallbackStrategy {
   reason: FallbackReason;
 }
 
+/** 媒体类型清单（模块内枚举口径，与 FALLBACK_STRATEGIES 键同源；不导出以收敛公共面）。 */
+const MEDIA_KINDS: readonly MediaKind[] = ["image", "video"];
+
 /**
  * 产出兜底计划（BEH-6）：任何失败原因都退到同一单级兜底——不分流、
  * 不轮换模型；质检重生成超限（BUDGET-2）与生成失败同路径。
@@ -35,8 +38,5 @@ export function planFallback(
  * 全量兜底策略清单（可枚举审查：恰两条、零模型调用）。
  */
 export function listFallbackStrategies(): FallbackStrategy[] {
-  return (["image", "video"] as const).map((kind): FallbackStrategy => {
-    const { ...strategy } = FALLBACK_STRATEGIES[kind];
-    return strategy;
-  });
+  return MEDIA_KINDS.map((kind) => ({ ...FALLBACK_STRATEGIES[kind] }));
 }

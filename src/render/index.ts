@@ -34,6 +34,16 @@ interface RenderDeps {
 const WIDTH = 900;
 const ROW_HEIGHT = 32;
 const TOP_OFFSET = 72;
+/** 版面几何与文字样式（BEH-5 确定性版面：数值变更=产物字节变更）。 */
+const LEFT_MARGIN = 24;
+const TITLE_BASELINE_Y = 36;
+const HEADER_BASELINE_LIFT = 12;
+const COLUMN_PITCH = 140;
+const TITLE_FONT_SIZE = 20;
+const BODY_FONT_SIZE = 16;
+const TITLE_COLOR = "#111111";
+const HEADER_COLOR = "#222222";
+const CELL_COLOR = "#333333";
 
 /**
  * 渲染尺码表详情图：白底 SVG、标题、表头与数据行（BEH-5：全程零模型调用）。
@@ -71,7 +81,7 @@ function svgFor(
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${height}" viewBox="0 0 ${WIDTH} ${height}">`,
     '<rect width="100%" height="100%" fill="#ffffff"/>',
-    `<text x="24" y="36" font-family="${font.family}" font-size="20" fill="#111111">${escapeXml(input.title)}</text>`,
+    `<text x="${LEFT_MARGIN}" y="${TITLE_BASELINE_Y}" font-family="${font.family}" font-size="${TITLE_FONT_SIZE}" fill="${TITLE_COLOR}">${escapeXml(input.title)}</text>`,
     header,
     rows,
     "</svg>",
@@ -79,8 +89,8 @@ function svgFor(
 }
 
 function headerRow(input: SizeChartInput, font: FontAsset): string {
-  const y = TOP_OFFSET - 12;
-  return `<text x="24" y="${y}" font-family="${font.family}" font-size="16" font-weight="bold" fill="#222222">${escapeXml(input.columns.join("    "))}</text>`;
+  const y = TOP_OFFSET - HEADER_BASELINE_LIFT;
+  return `<text x="${LEFT_MARGIN}" y="${y}" font-family="${font.family}" font-size="${BODY_FONT_SIZE}" font-weight="bold" fill="${HEADER_COLOR}">${escapeXml(input.columns.join("    "))}</text>`;
 }
 
 function bodyRow(row: string[], index: number, font: FontAsset): string {
@@ -88,7 +98,7 @@ function bodyRow(row: string[], index: number, font: FontAsset): string {
   const cells = row
     .map(
       (cell, column) =>
-        `<text x="${24 + column * 140}" y="${y}" font-family="${font.family}" font-size="16" fill="#333333">${escapeXml(cell)}</text>`,
+        `<text x="${LEFT_MARGIN + column * COLUMN_PITCH}" y="${y}" font-family="${font.family}" font-size="${BODY_FONT_SIZE}" fill="${CELL_COLOR}">${escapeXml(cell)}</text>`,
     )
     .join(" ");
   return cells;
