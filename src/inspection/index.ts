@@ -27,9 +27,11 @@ export interface NormalizationPlan {
   actions: string[];
 }
 
+/** 一条规格规则：判定 + 对应的强制规格化动作（BEH-7 违规与动作一一对应）。 */
 interface ImageRule {
   id: string;
   message: string;
+  action: string;
   violated: (artifact: ImageArtifact) => boolean;
 }
 
@@ -37,50 +39,49 @@ const IMAGE_RULES: readonly ImageRule[] = [
   {
     id: "min-side",
     message: "shortest side below the role minimum",
+    action: "resize-crop-to-min-side",
     violated: (a) => Math.min(a.width, a.height) < MIN_SIDES[a.role],
   },
   {
     id: "main-square",
     message: "main image is not square",
+    action: "center-crop-square",
     violated: (a) => a.role === "main_image" && a.width !== a.height,
   },
   {
     id: "main-white-background",
     message: "main image background is not pure white",
+    action: "recomposite-white-background",
     violated: (a) => a.role === "main_image" && a.background !== "white",
   },
   {
     id: "size-budget",
     message: "image exceeds the per-file byte budget",
+    action: "recompress-under-budget",
     violated: (a) => a.bytes > MAX_IMAGE_BYTES,
   },
 ];
 
-const ACTIONS_BY_RULE: Record<string, string> = {
-  "min-side": "resize-crop-to-min-side",
-  "main-square": "center-crop-square",
-  "main-white-background": "recomposite-white-background",
-  "size-budget": "recompress-under-budget",
-};
+function violationsOf(artifact: ImageArtifact): readonly ImageRule[] {
+  return IMAGE_RULES.filter((rule) => rule.violated(artifact));
+}
 
 /**
  * 规格校验（BEH-7）：返回全部违规；空清单=合规。
  */
 export function inspectImage(artifact: ImageArtifact): ImageFinding[] {
-  return IMAGE_RULES.filter((rule) => rule.violated(artifact)).map(
-    (rule): ImageFinding => ({ rule: rule.id, message: rule.message }),
-  );
+  return violationsOf(artifact).map((rule): ImageFinding => ({
+    rule: rule.id,
+    message: rule.message,
+  }));
 }
 
 /**
- * 强制规格化计划（BEH-7 then）：每条违规映射一个本地处理动作；
+ * 强制规格化计划（BEH-7 then）：每条违规映射其规则声明的本地处理动作；
  * 合规产物动作清单为空。
  */
 export function normalizeImage(artifact: ImageArtifact): NormalizationPlan {
-  const findings = inspectImage(artifact);
-  const actions = findings.map(
-    (finding) => ACTIONS_BY_RULE[finding.rule] ?? "re-encode",
-  );
+  const actions = violationsOf(artifact).map((rule) => rule.action);
   return { artifactRole: artifact.role, actions };
 }
 

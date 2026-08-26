@@ -24,22 +24,29 @@ interface StrategyDocument {
   sections: string[];
 }
 
-const STRATEGY_SECTIONS: readonly StrategySection[] = [
-  { id: "cost-estimation", heading: "单商品成本估算" },
-  { id: "efficiency-comparison", heading: "与人工流程的效率对比" },
-  { id: "adaptation-cost", heading: "换品类与换市场适配成本声明" },
+/** 节定义即文档结构：id、标题与该节内容行的取数入口（一一绑定，无旁路映射）。 */
+const STRATEGY_SECTIONS: readonly (StrategySection & {
+  linesOf: (input: StrategyInput) => string[];
+})[] = [
+  {
+    id: "cost-estimation",
+    heading: "单商品成本估算",
+    linesOf: (input) => input.costLines,
+  },
+  {
+    id: "efficiency-comparison",
+    heading: "与人工流程的效率对比",
+    linesOf: (input) => input.comparisonLines,
+  },
+  {
+    id: "adaptation-cost",
+    heading: "换品类与换市场适配成本声明",
+    linesOf: (input) => input.adaptationLines,
+  },
 ];
 
 /** 文档主标题。 */
 const DOCUMENT_TITLE = "单商品视觉产物策略说明";
-
-function sectionLines(input: StrategyInput): Record<string, string[]> {
-  return {
-    "cost-estimation": input.costLines,
-    "efficiency-comparison": input.comparisonLines,
-    "adaptation-cost": input.adaptationLines,
-  };
-}
 
 function renderSection(section: StrategySection, lines: string[]): string {
   return [`## ${section.heading}`, ...lines.map((line) => `- ${line}`)].join(
@@ -52,9 +59,8 @@ function renderSection(section: StrategySection, lines: string[]): string {
  * 尾注留痕运行日志引用（数据可追溯）。
  */
 export function buildStrategyDocument(input: StrategyInput): StrategyDocument {
-  const linesById = sectionLines(input);
   const body = STRATEGY_SECTIONS.map((section) =>
-    renderSection(section, linesById[section.id] ?? []),
+    renderSection(section, section.linesOf(input)),
   );
   const markdown = [
     `# ${DOCUMENT_TITLE}`,
@@ -68,8 +74,11 @@ export function buildStrategyDocument(input: StrategyInput): StrategyDocument {
 }
 
 /**
- * 三节定义清单（INV-3：可枚举资产逐条可回查；返回副本防外泄篡改）。
+ * 三节定义清单（INV-3：可枚举资产逐条可回查；仅返回定义面，防外泄篡改）。
  */
 export function listStrategySections(): StrategySection[] {
-  return STRATEGY_SECTIONS.map((section): StrategySection => ({ ...section }));
+  return STRATEGY_SECTIONS.map((section): StrategySection => ({
+    id: section.id,
+    heading: section.heading,
+  }));
 }

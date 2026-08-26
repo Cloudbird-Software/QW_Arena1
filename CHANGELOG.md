@@ -13,3 +13,6 @@
 - `src/render` 模块：尺码表详情图本地渲染——白底 SVG、三语字体嵌入、零模型调用（`renderSizeChart` / `listFontAssets`）。
 - `src/fallback` 模块：单级兜底——图片源图裁剪加本地合成、视频图片轮播，无多级模型轮换（`planFallback` / `listFallbackStrategies`）。
 - `src/inspection` 模块：产物规格校验与强制规格化——主图白底方图 ≥1200、详情图 ≥900、单张 ≤4.5MB（`inspectImage` / `normalizeImage` / `listSpecThresholds`）。
+
+### Changed
+- 技术债清扫（行为保持，W1–W8 落地代码）：规格规则与强制化动作并入单一 `IMAGE_RULES` 表；策略节定义内联内容行取数（删除旁路映射与静默回退）；尺码表 SVG 版面魔数提为命名常量；兜底媒体类型清单收敛为模块内 `MEDIA_KINDS` 常量；移除 `visual` 内部冗余包装函数。公共 API 与输出不变。

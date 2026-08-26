@@ -17,11 +17,7 @@ import {
   MARKET_VISUAL_DICTIONARIES,
   MARKETS,
 } from "./dictionaries.js";
-import type {
-  Market,
-  MarketDictionaryEntry,
-  MarketDimension,
-} from "./dictionaries.js";
+import type { Market, MarketDictionaryEntry } from "./dictionaries.js";
 
 export type {
   CompositionAsset,
@@ -61,17 +57,13 @@ export function listCompositionAssets(): CompositionAsset[] {
   );
 }
 
-function marketDictionaryFor(market: Market): Record<MarketDimension, string> {
-  return MARKET_VISUAL_DICTIONARIES[market];
-}
-
 /**
  * 全量词典清单（IFACE-1：市场→视觉风格条目映射可枚举审查，逐条可回查）。
  */
 export function listMarketDictionaryEntries(): MarketDictionaryEntry[] {
   return MARKETS.flatMap((market) =>
     MARKET_DIMENSIONS.map((dimension): MarketDictionaryEntry => {
-      const text = marketDictionaryFor(market)[dimension];
+      const text = MARKET_VISUAL_DICTIONARIES[market][dimension];
       return { market, dimension, text };
     }),
   );
@@ -86,7 +78,7 @@ export function buildImagePrompt(
   role: ImageRole,
   market: Market,
 ): string {
-  const dictionary = marketDictionaryFor(market);
+  const dictionary = MARKET_VISUAL_DICTIONARIES[market];
   const fragments = [
     "e-commerce product photo of the listed garment",
     compositionFor(category, role),
