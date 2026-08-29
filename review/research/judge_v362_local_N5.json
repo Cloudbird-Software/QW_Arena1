@@ -1,0 +1,324 @@
+{
+ "meta": {
+  "output_dir": "D:/Projects/QW_ARENA1/build_v2/ladder/v350/run_v353/output",
+  "input_source": "D:/Projects/QW_ARENA1/build_v2/ladder/v350/run_v353/input\\product_info\\product_3887087154767.json",
+  "models": {
+   "text": "qwen3.6-flash",
+   "vl": "qwen3-vl-plus"
+  },
+  "samples_per_dim": 5,
+  "generated_at": "2026-08-29T18:08:41"
+ },
+ "weights": {
+  "A1": 25.0,
+  "A2": 20.0,
+  "A3": 18.0,
+  "A4": 15.0,
+  "A5": 10.0,
+  "A6": 7.0,
+  "A7": 5.0
+ },
+ "A2": {
+  "score": 100.0,
+  "weight": 20.0,
+  "detail": {
+   "matched": [
+    "detail_image_1",
+    "detail_image_2",
+    "detail_image_3",
+    "detail_image_4",
+    "detail_image_5",
+    "main_image",
+    "product_description_en",
+    "product_description_ko",
+    "product_description_pt",
+    "product_video",
+    "strategy_document"
+   ],
+   "missing": [],
+   "extra": [],
+   "mismatched": [],
+   "file_count": 11,
+   "expected_count": 11,
+   "main_image": {
+    "dims": [
+     800,
+     800
+    ],
+    "bytes": 75097,
+    "ge_800x800": true
+   },
+   "detail_images": {
+    "detail_image_1": {
+     "dims": [
+      750,
+      886
+     ],
+     "bytes": 66801,
+     "ok": true
+    },
+    "detail_image_2": {
+     "dims": [
+      800,
+      800
+     ],
+     "bytes": 84653,
+     "ok": true
+    },
+    "detail_image_3": {
+     "dims": [
+      800,
+      800
+     ],
+     "bytes": 85109,
+     "ok": true
+    },
+    "detail_image_4": {
+     "dims": [
+      800,
+      800
+     ],
+     "bytes": 64393,
+     "ok": true
+    },
+    "detail_image_5": {
+     "dims": [
+      750,
+      959
+     ],
+     "bytes": 88602,
+     "ok": true
+    }
+   },
+   "video": {
+    "exists": true,
+    "size": 3826524,
+    "ftyp": true,
+    "moov": true,
+    "playable_container": true,
+    "duration_s": null,
+    "ffprobe_err": null
+   },
+   "subs": {
+    "fileset": 1.0,
+    "main_image_spec": 1.0,
+    "detail_images_spec": 1.0,
+    "text_lt_1mb": 1.0,
+    "video_spec": 1.0
+   }
+  }
+ },
+ "A3": {
+  "score": 85.0,
+  "weight": 18.0,
+  "detail": {
+   "leaf_category": {
+    "expected": "女式衬衫",
+    "similarity": 1.0,
+    "path_line_present": true,
+    "score": 1.0
+   },
+   "attr_recall": {
+    "pairs_total": 35,
+    "hit_credit": 35.0,
+    "recall": 1.0,
+    "below_full": []
+   },
+   "sku_rows": {
+    "expected": 24,
+    "detected_best": 0,
+    "score": 0.0
+   },
+   "sale_attr_summary": {
+    "color_line": true,
+    "size_line": true,
+    "score": 1.0
+   }
+  }
+ },
+ "A5": {
+  "score": 100.0,
+  "weight": 10.0,
+  "detail": {
+   "recall_keys_missing": [],
+   "fabricated_long_numbers": [],
+   "recall": 1.0,
+   "precision_long": 1.0
+  }
+ },
+ "A1": {
+  "score": 85.9,
+  "weight": 25.0,
+  "detail": {
+   "text_channel": {
+    "score": 82.0,
+    "samples": [
+     98.0,
+     80.0,
+     85.0,
+     82.0,
+     70.0
+    ],
+    "errors": []
+   },
+   "visual_channel": {
+    "score": 95.0,
+    "samples": [
+     95.0,
+     95.0,
+     95.0,
+     95.0,
+     95.0
+    ],
+    "errors": []
+   },
+   "blend": "0.7*text + 0.3*visual"
+  }
+ },
+ "A4": {
+  "score": 71.43,
+  "weight": 15.0,
+  "detail": {
+   "items_rubric": "7 子项各 0-1 取均值×100",
+   "samples": [
+    71.42857142857143,
+    62.85714285714287,
+    68.57142857142857,
+    71.42857142857143,
+    85.71428571428571
+   ],
+   "errors": []
+  }
+ },
+ "A6": {
+  "score": 100.0,
+  "weight": 7.0,
+  "detail": {
+   "per_image": {
+    "main_image": {
+     "samples": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "last_json": {
+      "usable": 1,
+      "clarity": 0.95,
+      "complete": 0.9,
+      "defects": "none",
+      "overlay_text": false,
+      "reason": "图像清晰、主体完整（仅轻微裁切腿部但不影响服装展示），无瑕疵、无水印或促销文字。"
+     },
+     "usable": 1.0
+    },
+    "detail_image_1": {
+     "samples": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "last_json": {
+      "usable": 1,
+      "clarity": 0.95,
+      "complete": 1,
+      "defects": "none",
+      "overlay_text": false,
+      "reason": "图像清晰、主体服装完整无裁切，无瑕疵、水印或促销文字。"
+     },
+     "usable": 1.0
+    },
+    "detail_image_2": {
+     "samples": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "last_json": {
+      "usable": 1,
+      "clarity": 0.95,
+      "complete": 1,
+      "defects": "none",
+      "overlay_text": false,
+      "reason": "图像清晰完整，服装主体无裁切、无瑕疵、无水印或促销文字叠加。"
+     },
+     "usable": 1.0
+    },
+    "detail_image_3": {
+     "samples": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "last_json": {
+      "usable": 1,
+      "clarity": 0.95,
+      "complete": 1,
+      "defects": "none",
+      "overlay_text": false,
+      "reason": "图像清晰完整，主体服装无裁切、无瑕疵、无水印或促销文字叠加。"
+     },
+     "usable": 1.0
+    },
+    "detail_image_4": {
+     "samples": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "last_json": {
+      "usable": 1,
+      "clarity": 0.95,
+      "complete": 1,
+      "defects": "none",
+      "overlay_text": false,
+      "reason": "图像清晰、服装主体完整无裁切，无瑕疵、水印或促销文字叠加。"
+     },
+     "usable": 1.0
+    },
+    "detail_image_5": {
+     "samples": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "last_json": {
+      "usable": 1,
+      "clarity": 0.95,
+      "complete": 1,
+      "defects": "none",
+      "overlay_text": false,
+      "reason": "图像清晰、服装主体完整无裁切，无瑕疵、水印或促销文字叠加。"
+     },
+     "usable": 1.0
+    }
+   },
+   "usable_ratio": 1.0,
+   "threshold": "平台口径：可用比例 ≥80% 合格"
+  }
+ },
+ "A7": {
+  "score": 60.0,
+  "weight": 5.0,
+  "detail": {
+   "container_ok": true,
+   "frames_extracted": 0,
+   "duration_s": null,
+   "vl": "skipped (no frames; ffmpeg missing or container invalid)",
+   "samples": [],
+   "degraded": "programmatic-only"
+  }
+ },
+ "total": 87.49
+}

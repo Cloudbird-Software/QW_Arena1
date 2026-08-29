@@ -1,0 +1,2 @@
+# Python stdlib only at runtime; Pillow 12.3.0 vendored under lib/ (manylinux wheel,
+# optional: used only by mainscene background scene synthesis, gracefully degrades when absent)
