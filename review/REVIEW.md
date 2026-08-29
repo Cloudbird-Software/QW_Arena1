@@ -31,3 +31,14 @@
 - 视频 = Wan2.7 i2v 生成（源数据无视频）。
 - mainscene 场景化：商品本体像素零改动（构造保证：生成图仅作背景层，本地合成），VL A/B 不过即回退；matte 质量不足时自动放弃（v3.6.1 验证跑实测触发回退）。
 - distinct<5 的商品（源素材不足）在 Run Report 显式建议人工复核后再发布。
+
+
+---
+
+# v3.6.2 增补（2026-08-29 晚）
+
+官方出分：v3.5.6=84.3 / v3.6.1=78.77（Δ-5.53 归因 mainscene）→ **v3.6.2 = v3.5.6 行为基线 + mainscene 默认关闭（代码保留 + XB_MAINSCENE=1 灰度）+ 上架一致性闸门 + 机评文本提分**。
+
+- 本轮新增：`agent-source-v362/`（源码快照）、`xborder-agent-v3.6.2-final.zip`（发布包）、`research/DEV_DIRECTIVE_EXEC_v362.md`（指令执行纪要含验收数据与未竟项）、`research/judge_v362_local_N5.json`（本地 judge 87.49）。
+- 验收：selftest 22/22；11 商品全量 exit 0 + 契约全保 + 上架闸门零直出；本地 judge 87.49（A5=100/A6=100）。
+- 未竟：CNB judge 回归阻塞于评测 key 欠费（VL 模型不可用）；P2 三项未做（详见执行纪要）。
