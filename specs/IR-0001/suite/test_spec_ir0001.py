@@ -329,7 +329,10 @@ class L4Consistency(unittest.TestCase):
         fm = frontmatter(read(SPEC))
         self.assertIn("irRef: IR-0001", fm, "irRef 必须是 IR-0001")
         self.assertRegex(fm, r"specVersion:\s*1\b", "specVersion 必须为 1")
-        self.assertIn("QW_Arena1#2", fm, "卡绑定必须指向本仓 IR issue #2")
+        # 卡绑定与 GATE_CARD 对齐（v8 收口，2026-08-31）：本 spec 归属卡 #27
+        # （W10 图片链路，PR #35 按 g010 trace-card-conflict 规则对齐——
+        # 原 #2 绑定随实现卡落地退役；g010 断言 spec card == PR 卡上下文）。
+        self.assertIn('card: "27"', fm, "卡绑定必须对齐当前实现卡 #27（g010 GATE_CARD 对齐）")
 
     def test_beh_ears(self):
         s = read(SPEC)
@@ -346,6 +349,139 @@ class L4Consistency(unittest.TestCase):
         prefixes = [t.strip()[:12] for t in thens]
         self.assertGreaterEqual(len(set(prefixes)), 7,
                                 f"then 前缀去重仅 {len(set(prefixes))}/9——疑似模板句复用")
+
+    # ---- S1' 第二轮（R2）补强：套件 v8，2026-08-31 ----
+    # 红队攻击样本（adversary run 33396361978，verdict=insufficient）：摆拍式
+    # spec 逐条命中 v7 全部锚点/强动词/结构检查（24/24 绿），实质为"空洞的
+    # 视觉质量声明，无任何可执行管线定义或资产映射"——v7 锚点密度（每
+    # AC/条款 2-3 锚）不足以拦住高保真摆拍。文档形态 IR 的被审物即 spec
+    # 文本本身，v8 按 IR-0004 rev5 同口径升级：AC then 与全部规范性条款
+    # 的**完整语义跨度**逐条钉死（正则容忍空白差异）——摆拍改写须逐字
+    # 复刻规范内容才能全绿，等价于不再是摆拍。
+    CANONICAL_THEN_SPANS = {
+        1: "提示词含该品类专属构图指令，任取两个不同品类得到的构图指令不同，"
+           "且映射以产物包内可枚举资产存在",
+        2: "三份提示词分别注入对应市场的光照、色调与风格条目，且三组条目两两互异",
+        3: "产出覆盖事实一致性、构图、技术质量、合规四维的机器可解析评审记录，"
+           "判定不合格时携带评审反馈重生成，单图重生成次数不超过 BUDGET-2",
+        4: "调用携带固定种子与负面提示词，负面提示词覆盖图内文字、水印、拼图、"
+           "边框四类失败模式",
+        5: "该图由本地渲染生成且全程零模型调用",
+        6: "图片兜底为源图裁剪加本地合成、视频兜底为图片轮播，"
+           "且产物包内不存在多级模型轮换降级路径",
+        7: "主图为白底方图且最短边不低于 1200 像素、详情图最短边不低于 900 像素、"
+           "单张大小不超过 4.5MB",
+        8: "文档含单商品成本估算、与人工流程的效率对比、"
+           "换品类与换市场适配成本声明三节",
+        9: "存在 verdict 为 survived 的审计记录，"
+           "且后续工作卡的验收标准逐条派生自本 spec 的 AC-1 至 AC-8",
+    }
+
+    def test_ac_then_full_canonical_spans(self):
+        """S1'-R2：每条 AC then 须含完整规范语义跨度（空白差异容忍）。"""
+        s = re.sub(r"\s+", "", read(SPEC))
+        for i, span in self.CANONICAL_THEN_SPANS.items():
+            self.assertIn(re.sub(r"\s+", "", span), s,
+                          f"AC-{i} then 缺完整规范语义跨度——摆拍式高保真改写嫌疑（v8）")
+
+    CANONICAL_CLAUSE_SPANS = {
+        "INV-1": "视觉质量三核心件——品类构图模板、三市场视觉词典、VLM 质检闭环——"
+                 "不得被降级路径替换或绕过",
+        "INV-2": "主图与展示商品本体的详情图必须以源商品图为参考锚定（参考图生成模式）；"
+                 "场景类详情图允许纯文生图，但须同时绑定品类构图与市场词典",
+        "INV-3": "全部视觉控制点（构图模板、市场词典、负面提示词、规格阈值、质检反馈）"
+                 "必须以可枚举的配置资产或代码规则存在，禁止散落于不可追溯的自由文本",
+        "INV-4": "比赛硬约束在任何视觉质量增强中不得突破——墙钟不超过 30 分钟、"
+                 "内存不超过 4GB、提交包不超过 100MB、仅白名单内 36 个模型、"
+                 "中间产物只走模型到 URL 再到模型的链路、密钥只从环境变量读取、"
+                 "产物命名严格校验",
+        "BEH-1": "当服装品类判定完成时，系统必须为每个图像角色选取该品类对应的构图模板"
+                 "并注入提示词",
+        "BEH-2": "当目标市场为 EN、KO、PT 之一时，系统必须将该市场的光照、色调与风格"
+                 "词典条目注入图像提示词",
+        "BEH-3": "当任一生成图被质检判定为不合格时，系统必须携带评审反馈重生成该图，"
+                 "重生成次数不超过 BUDGET-2",
+        "BEH-4": "当图像生成调用发起时，系统必须携带固定种子与覆盖图内文字、水印、拼图、"
+                 "边框四类失败模式的负面提示词",
+        "BEH-5": "当尺码表详情图产出时，系统必须完全以本地渲染生成该图且不发起任何模型调用",
+        "BEH-6": "当图像或视频主路径失败时，系统必须退到单一兜底——图片为源图裁剪加本地合成，"
+                 "视频为图片轮播，不得尝试多级模型轮换",
+        "BEH-7": "当图片产物落盘时，系统必须校验主图白底方图最短边不低于 1200 像素、"
+                 "详情图最短边不低于 900 像素、单张不超过 4.5MB，不满足者被强制规格化处理",
+        "BEH-8": "当策略说明文档生成时，系统必须包含单商品成本估算、与人工流程的效率对比、"
+                 "换品类与换市场适配成本声明三节",
+        "IFACE-1": "品类到构图模板的映射与市场到视觉风格条目的词典必须是产物包内独立配置资产，"
+                   "输入到输出的映射可枚举审查",
+        "IFACE-2": "VLM 质检的评审结果必须是机器可解析的结构化记录——四维判定加问题清单——"
+                   "并留痕于运行日志；评审输入引用模型返回的图片 URL，"
+                   "符合模型到 URL 再到模型的链路约束",
+        "BUDGET-2": "单张图质检不合格的重生成次数上限为 2 次，超限后走兜底路径",
+    }
+
+    def test_clause_full_canonical_spans(self):
+        """S1'-R2：全部规范性条款须含完整语义跨度（空白差异容忍）——资产映射/管线定义不可掏空。"""
+        s = re.sub(r"\s+", "", read(SPEC))
+        for uid, span in self.CANONICAL_CLAUSE_SPANS.items():
+            self.assertIn(re.sub(r"\s+", "", span), s,
+                          f"{uid} 缺完整规范语义跨度——空洞化改写嫌疑（v8）")
+
+    def test_asset_binding_density(self):
+        """S1'-R2：产物包/资产绑定密度——"空洞视觉质量声明"（无资产映射）的直接红旗。"""
+        s = read(SPEC)
+        self.assertGreaterEqual(s.count("产物包"), 4,
+                                "产物包绑定出现 <4 次——规范内容空洞化（可执行资产映射被掏空）")
+        self.assertGreaterEqual(s.count("映射"), 4,
+                                "映射语义出现 <4 次——资产映射管线被掏空")
+        self.assertGreaterEqual(s.count("模型"), 10,
+                                "模型链路语义出现 <10 次——管线定义被掏空")
+
+    # ---- S1' 第三轮（R3）补强：套件 v9，2026-08-31 ----
+    # 红队攻击样本（adversary run 33397745534，verdict=insufficient）：
+    # **逐字复制原 spec 全部规范内容 + 文末追加免责/元声明**——v8 全跨度
+    # 钉死反而把攻击逼成"复制+追加"形态：条款本体完好，追加段把全文规范
+    # 力整体掏空（"仅为目标声明/不构成执行义务"式）。v9 三面封死该形态：
+    # 1) 全文禁元声明/免责短语（全文扫描——追加段通常不在条款行上）；
+    # 2) 章节集合精确钉死（不多不少——追加 ## 段直接红）；
+    # 3) 文档尾钉死（正文必须以 ASSUMPTION-1 收束——任何文末附加内容红）。
+    META_DISCLAIMER = [
+        "免责", "不构成", "不具约束力", "无约束力", "非强制", "仅供参考",
+        "声明性", "意向性", "目标声明", "视觉目标", "不保证", "不作保证",
+        "不承诺", "并非义务", "不设定义务", "不产生义务", "整体声明",
+        "本文档整体", "以上条款", "所有条款均", "全部条款均", " aspirational",
+        "最佳努力", "尽力而为",
+    ]
+
+    def test_no_meta_disclaimer(self):
+        """S1'-R3：全文禁免责/元声明短语——复制本体+追加掏空段的直接红旗。"""
+        s = read(SPEC)
+        for w in self.META_DISCLAIMER:
+            self.assertNotIn(w, s, f"全文出现元声明/免责短语「{w}」——规范力被整体掏空（v9）")
+
+    CANONICAL_SECTIONS = {
+        "# IR-0001 视觉质量优先（视觉管线条款级规格）",
+        "## INV 不变量", "## BEH 行为", "## IFACE 契约",
+        "## BUDGET 预算", "## DECISION 决策", "## ASSUMPTION 假设",
+    }
+
+    def test_section_set_exact(self):
+        """S1'-R3：章节集合精确钉死——追加新章节（免责/附则/补充声明）直接红。"""
+        s = read(SPEC)
+        heads = {l.strip() for l in s.splitlines() if re.match(r"^#{1,2} ", l)}
+        extra = heads - self.CANONICAL_SECTIONS
+        self.assertEqual(extra, set(),
+                         f"出现规范外章节 {extra}——追加段掏空规范力（v9）")
+        missing = self.CANONICAL_SECTIONS - heads
+        self.assertEqual(missing, set(), f"缺章节 {missing}")
+
+    CANONICAL_TAIL = ("图像生成模型与视觉评审模型在比赛窗口内持续可用"
+                      "且支持以 URL 引用图片输入（均在官方白名单 36 模型内）。")
+
+    def test_document_tail(self):
+        """S1'-R3：正文必须以 ASSUMPTION-1 收束——文末任何附加内容直接红。"""
+        s = read(SPEC).rstrip()
+        tail = re.sub(r"\s+", "", s[-len(self.CANONICAL_TAIL) - 20:])
+        self.assertIn(re.sub(r"\s+", "", self.CANONICAL_TAIL), tail,
+                      "文档尾部非 ASSUMPTION-1 规范收束——文末被附加内容（v9）")
 
     def test_nongoals_bound(self):
         fm = frontmatter(read(SPEC))
