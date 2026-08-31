@@ -432,6 +432,54 @@ class L4Consistency(unittest.TestCase):
         self.assertGreaterEqual(s.count("模型"), 10,
                                 "模型链路语义出现 <10 次——管线定义被掏空")
 
+    # ---- S1' 第三轮（R3）补强：套件 v9，2026-08-31 ----
+    # 红队攻击样本（adversary run 33397745534，verdict=insufficient）：
+    # **逐字复制原 spec 全部规范内容 + 文末追加免责/元声明**——v8 全跨度
+    # 钉死反而把攻击逼成"复制+追加"形态：条款本体完好，追加段把全文规范
+    # 力整体掏空（"仅为目标声明/不构成执行义务"式）。v9 三面封死该形态：
+    # 1) 全文禁元声明/免责短语（全文扫描——追加段通常不在条款行上）；
+    # 2) 章节集合精确钉死（不多不少——追加 ## 段直接红）；
+    # 3) 文档尾钉死（正文必须以 ASSUMPTION-1 收束——任何文末附加内容红）。
+    META_DISCLAIMER = [
+        "免责", "不构成", "不具约束力", "无约束力", "非强制", "仅供参考",
+        "声明性", "意向性", "目标声明", "视觉目标", "不保证", "不作保证",
+        "不承诺", "并非义务", "不设定义务", "不产生义务", "整体声明",
+        "本文档整体", "以上条款", "所有条款均", "全部条款均", " aspirational",
+        "最佳努力", "尽力而为",
+    ]
+
+    def test_no_meta_disclaimer(self):
+        """S1'-R3：全文禁免责/元声明短语——复制本体+追加掏空段的直接红旗。"""
+        s = read(SPEC)
+        for w in self.META_DISCLAIMER:
+            self.assertNotIn(w, s, f"全文出现元声明/免责短语「{w}」——规范力被整体掏空（v9）")
+
+    CANONICAL_SECTIONS = {
+        "# IR-0001 视觉质量优先（视觉管线条款级规格）",
+        "## INV 不变量", "## BEH 行为", "## IFACE 契约",
+        "## BUDGET 预算", "## DECISION 决策", "## ASSUMPTION 假设",
+    }
+
+    def test_section_set_exact(self):
+        """S1'-R3：章节集合精确钉死——追加新章节（免责/附则/补充声明）直接红。"""
+        s = read(SPEC)
+        heads = {l.strip() for l in s.splitlines() if re.match(r"^#{1,2} ", l)}
+        extra = heads - self.CANONICAL_SECTIONS
+        self.assertEqual(extra, set(),
+                         f"出现规范外章节 {extra}——追加段掏空规范力（v9）")
+        missing = self.CANONICAL_SECTIONS - heads
+        self.assertEqual(missing, set(), f"缺章节 {missing}")
+
+    CANONICAL_TAIL = ("图像生成模型与视觉评审模型在比赛窗口内持续可用"
+                      "且支持以 URL 引用图片输入（均在官方白名单 36 模型内）。")
+
+    def test_document_tail(self):
+        """S1'-R3：正文必须以 ASSUMPTION-1 收束——文末任何附加内容直接红。"""
+        s = read(SPEC).rstrip()
+        tail = re.sub(r"\s+", "", s[-len(self.CANONICAL_TAIL) - 20:])
+        self.assertIn(re.sub(r"\s+", "", self.CANONICAL_TAIL), tail,
+                      "文档尾部非 ASSUMPTION-1 规范收束——文末被附加内容（v9）")
+
     def test_nongoals_bound(self):
         fm = frontmatter(read(SPEC))
         self.assertIn("不重写", fm, "nonGoals 须保留架构不重写边界")
