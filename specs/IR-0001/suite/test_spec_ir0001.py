@@ -329,7 +329,10 @@ class L4Consistency(unittest.TestCase):
         fm = frontmatter(read(SPEC))
         self.assertIn("irRef: IR-0001", fm, "irRef 必须是 IR-0001")
         self.assertRegex(fm, r"specVersion:\s*1\b", "specVersion 必须为 1")
-        self.assertIn("QW_Arena1#2", fm, "卡绑定必须指向本仓 IR issue #2")
+        # 卡绑定与 GATE_CARD 对齐（v8 收口，2026-08-31）：本 spec 归属卡 #27
+        # （W10 图片链路，PR #35 按 g010 trace-card-conflict 规则对齐——
+        # 原 #2 绑定随实现卡落地退役；g010 断言 spec card == PR 卡上下文）。
+        self.assertIn('card: "27"', fm, "卡绑定必须对齐当前实现卡 #27（g010 GATE_CARD 对齐）")
 
     def test_beh_ears(self):
         s = read(SPEC)
