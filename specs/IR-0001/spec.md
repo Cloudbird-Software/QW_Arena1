@@ -3,7 +3,7 @@ taskId: IR-0001
 specVersion: 1
 title: 视觉质量优先——品类构图×市场词典×VLM 质检闭环×降级收缩×商业叙事
 irRef: IR-0001
-card: "27"
+card: "Cloudbird-Software/QW_Arena1#2"
 acceptanceCriteria:
   - id: AC-1
     given: 品类构图模板映射与图像角色清单已定义
